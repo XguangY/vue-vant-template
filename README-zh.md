@@ -1,15 +1,15 @@
 # vue-vant-template
 Use vant's vue project template AND This is a base template
 
-English | [简体中文](./README-zh.md)
+ [English](./README.md) | 简体中文
 
-## Integrated content
+## 集成内容
 
-+ Integrate with popular mobile devices [vant](https://youzan.github.io/vant/#/zh-CN/intro)
-+ Rem-based adaptation has been configured
-+ Use[axios](https://github.com/axios/axios) as the project request plug-in
-+ vue Family Meals
-+ Stay tuned for more basics...
++ 集成当下流行的移动端 [vant](https://youzan.github.io/vant/#/zh-CN/intro)
++ 已配置基于 Rem 的适配方案
++ 使用[axios](https://github.com/axios/axios) 作为项目请求插件
++ vue 全家桶
++ 更多基础配置敬请期待...
 
 ```bash
 
