@@ -6,6 +6,7 @@ English | [简体中文](./README-zh.md)
 ## Integrated content
 
 + Integrate with popular mobile devices [vant](https://youzan.github.io/vant/#/zh-CN/intro)
++ Implement vant form validation based on 'async-validator'
 + Rem-based adaptation has been configured
 + Use[axios](https://github.com/axios/axios) as the project request plug-in
 + vue Family Meals

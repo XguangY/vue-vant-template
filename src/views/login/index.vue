@@ -1,236 +1,217 @@
 <template>
-  <div class="login-container">
-    <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
-
-      <div class="title-container">
-        <h3 class="title">Login Form</h3>
-      </div>
-
-      <el-form-item prop="username">
-        <span class="svg-container">
-          <svg-icon icon-class="user" />
-        </span>
-        <el-input
-          ref="username"
-          v-model="loginForm.username"
-          placeholder="Username"
-          name="username"
-          type="text"
-          tabindex="1"
-          auto-complete="on"
+  <div class="login">
+    <div class="img">
+      <a href="https://github.com/XguangY" target="_blank" rel="noopener noreferrer">
+        <van-image
+          width="4rem"
+          height="4rem"
+          round
+          fit="cover"
+          src="https://avatars3.githubusercontent.com/u/31021895?s=460&v=4"
         />
-      </el-form-item>
+      </a>
+    </div>
+    <van-cell-group style="height:200px;">
+      <van-field
+        v-model="data.name"
+        placeholder="用户名"
+        :error-message="errorMsg.name"
+        @blur="nameBlur('name')"
+      />
+      <!-- 密码输入框 -->
+      <van-password-input
+        class="pass"
+        :value="data.password"
+        :focused="showKeyboard"
+        :error-message="errorMsg.password"
+        @focus="showKeyboard = true"
+        @blur="passBlur('password')"
+      />
 
-      <el-form-item prop="password">
-        <span class="svg-container">
-          <svg-icon icon-class="password" />
-        </span>
-        <el-input
-          :key="passwordType"
-          ref="password"
-          v-model="loginForm.password"
-          :type="passwordType"
-          placeholder="Password"
-          name="password"
-          tabindex="2"
-          auto-complete="on"
-          @keyup.enter.native="handleLogin"
-        />
-        <span class="show-pwd" @click="showPwd">
-          <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
-        </span>
-      </el-form-item>
-
-      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">Login</el-button>
-
-      <div class="tips">
-        <span style="margin-right:20px;">username: admin</span>
-        <span> password: any</span>
-      </div>
-
-    </el-form>
+      <!-- 数字键盘 -->
+      <van-number-keyboard
+        :show="showKeyboard"
+        @input="onInput"
+        @delete="onDelete"
+        @blur="showKeyboard = false"
+      />
+    </van-cell-group>
+    <div class="sub">
+      <van-button block type="primary" @click="submit">登 陆</van-button>
+      <van-button block class="mar-top" @click="reset">重 置</van-button>
+    </div>
+    <van-cell title="用户名" icon="user-o" value="admin" />
+    <van-cell title="密码" icon="setting-o" value="123456" />
   </div>
 </template>
-
 <script>
-import { validUsername } from '@/utils/validate'
+import {
+  Image,
+  Field,
+  CellGroup,
+  Cell,
+  Button,
+  Toast,
+  PasswordInput,
+  NumberKeyboard
+} from 'vant'
+import validator from '@/utils/validator.js'
 
 export default {
-  name: 'Login',
+  name: 'Demo',
+  components: {
+    [Image.name]: Image,
+    [Field.name]: Field,
+    [Button.name]: Button,
+    [Cell.name]: Cell,
+    [CellGroup.name]: CellGroup,
+    [PasswordInput.name]: PasswordInput,
+    [NumberKeyboard.name]: NumberKeyboard
+  },
   data() {
-    const validateUsername = (rule, value, callback) => {
-      if (!validUsername(value)) {
-        callback(new Error('Please enter the correct user name'))
-      } else {
-        callback()
-      }
-    }
-    const validatePassword = (rule, value, callback) => {
-      if (value.length < 6) {
-        callback(new Error('The password can not be less than 6 digits'))
-      } else {
-        callback()
-      }
-    }
     return {
-      loginForm: {
-        username: 'admin',
-        password: '111111'
+      countdown: 0,
+      data: {
+        name: '',
+        password: ''
       },
-      loginRules: {
-        username: [{ required: true, trigger: 'blur', validator: validateUsername }],
-        password: [{ required: true, trigger: 'blur', validator: validatePassword }]
+      errorMsg: {
+        name: '',
+        password: ''
       },
-      loading: false,
-      passwordType: 'password',
-      redirect: undefined
+      value: '',
+      showKeyboard: false,
+      rules: {
+        name: [{ required: true, message: '请输入用户名' }],
+        password: [
+          {
+            validator: (rule, value, callback) => {
+              if (!value) {
+                callback('请输入密码')
+              } else if (/^[0-9]{6}$/.test(value)) {
+                callback()
+              } else {
+                callback('请输入正确的密码')
+              }
+            }
+          }
+        ]
+      }
     }
   },
-  watch: {
-    $route: {
-      handler: function(route) {
-        this.redirect = route.query && route.query.redirect
-      },
-      immediate: true
-    }
+  created() {
+    this.validator = validator(this.rules, this.data)
   },
   methods: {
-    showPwd() {
-      if (this.passwordType === 'password') {
-        this.passwordType = ''
-      } else {
-        this.passwordType = 'password'
-      }
-      this.$nextTick(() => {
-        this.$refs.password.focus()
+    /**
+     * 清除验证提示
+     * @param attrs
+     */
+    resetField(attrs) {
+      attrs = !attrs
+        ? Object.keys(this.errorMsg)
+        : Array.isArray(attrs)
+          ? attrs
+          : [attrs]
+      attrs.forEach(attr => {
+        this.errorMsg[attr] = ''
       })
     },
-    handleLogin() {
-      this.$refs.loginForm.validate(valid => {
-        if (valid) {
-          this.loading = true
-          this.$store.dispatch('user/login', this.loginForm).then(() => {
-            this.$router.push({ path: this.redirect || '/' })
-            this.loading = false
-          }).catch(() => {
-            this.loading = false
+    /**
+     * 验证方法
+     * @param callback
+     * @param data
+     */
+    validate(callback, data) {
+      this.validator.validate((errors, fields) => {
+        this.resetField()
+        if (errors) {
+          fields.forEach(item => {
+            this.errorMsg[item.field] = item.message
           })
-        } else {
-          console.log('error submit!!')
-          return false
         }
-      })
+        callback && callback(errors, fields)
+      }, data)
+    },
+    submit() {
+      this.validate((errors, fields) => {})
+    },
+    reset() {
+      this.data = {
+        name: '',
+        code: '',
+        mobile: ''
+      }
+      this.validator.setData(this.data)
+      this.resetField()
+    },
+    nameBlur(val) {
+      this.validate(errors => {
+        if (!errors) {
+          Toast('输入正确') // 后期注释
+        } else {
+          Toast(errors) // 错误逻辑
+        }
+      }, val)
+    },
+    passBlur(val) {
+      this.validate(errors => {
+        // if (!errors) {
+        //   Toast("输入正确") // 后期注释
+        // } else {
+        //   Toast(errors) // 错误逻辑
+        // }
+      }, val)
+    },
+    // l;;l;l';'l;'l;'l
+    onInput(key) {
+      this.value = (this.value + key).slice(0, 6)
+    },
+    onDelete() {
+      this.value = this.value.slice(0, this.value.length - 1)
     }
   }
 }
 </script>
 
-<style lang="scss">
-/* 修复input 背景不协调 和光标变色 */
-
-$bg:#283443;
-$light_gray:#fff;
-$cursor: #fff;
-
-@supports (-webkit-mask: none) and (not (cater-color: $cursor)) {
-  .login-container .el-input input {
-    color: $cursor;
+<style  lang="scss" scoped>
+.login {
+  height: 100vh;
+  background-color: rgb(247, 248, 250);
+  .img {
+    padding: 50px 0;
+    display: flex;
+    justify-content: center;
   }
-}
-
-/* reset element-ui css */
-.login-container {
-  .el-input {
-    display: inline-block;
-    height: 47px;
-    width: 85%;
-
-    input {
-      background: transparent;
-      border: 0px;
-      -webkit-appearance: none;
-      border-radius: 0px;
-      padding: 12px 5px 12px 15px;
-      color: $light_gray;
-      height: 47px;
-      caret-color: $cursor;
-
-      &:-webkit-autofill {
-        box-shadow: 0 0 0px 1000px $bg inset !important;
-        -webkit-text-fill-color: $cursor !important;
-      }
+  .sub {
+    padding: 10px 20px;
+    > button:last-child {
+      margin-top: 10px;
     }
   }
-
-  .el-form-item {
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(0, 0, 0, 0.1);
-    border-radius: 5px;
-    color: #454545;
-  }
 }
-</style>
-
-<style lang="scss" scoped>
-$bg:#2d3a4b;
-$dark_gray:#889aa4;
-$light_gray:#eee;
-
-.login-container {
-  min-height: 100%;
-  width: 100%;
-  background-color: $bg;
+.login /deep/ .van-field__body {
+  padding: 0 20px;
+  font-size: 16px;
+  height: 50px;
+  line-height: 40px;
+  border-radius: 25px;
+  text-align: center;
+  background-color: #ccc;
+}
+.login /deep/ .van-field__error-message,
+.login /deep/ .van-field__control {
+  text-align: center;
+}
+.login /deep/ .van-password-input__security {
+  border-radius: 30px;
+  // border: 1px solid #ccc;
   overflow: hidden;
-
-  .login-form {
-    position: relative;
-    width: 520px;
-    max-width: 100%;
-    padding: 160px 35px 0;
-    margin: 0 auto;
-    overflow: hidden;
-  }
-
-  .tips {
-    font-size: 14px;
-    color: #fff;
-    margin-bottom: 10px;
-
-    span {
-      &:first-of-type {
-        margin-right: 16px;
-      }
-    }
-  }
-
-  .svg-container {
-    padding: 6px 5px 6px 15px;
-    color: $dark_gray;
-    vertical-align: middle;
-    width: 30px;
-    display: inline-block;
-  }
-
-  .title-container {
-    position: relative;
-
-    .title {
-      font-size: 26px;
-      color: $light_gray;
-      margin: 0px auto 40px auto;
-      text-align: center;
-      font-weight: bold;
-    }
-  }
-
-  .show-pwd {
-    position: absolute;
-    right: 10px;
-    top: 7px;
-    font-size: 16px;
-    color: $dark_gray;
-    cursor: pointer;
-    user-select: none;
-  }
+}
+.login /deep/ .pass {
+  margin-top: 8px;
+}
+.login /deep/ .van-password-input__security li {
+  background-color: #ccc;
 }
 </style>

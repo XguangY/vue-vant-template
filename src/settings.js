@@ -1,6 +1,6 @@
 module.exports = {
 
-  title: 'Parallel-Form',
+  title: 'vue Vant Template',
 
   /**
    * @type {boolean} true | false

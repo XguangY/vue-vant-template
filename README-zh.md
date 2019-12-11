@@ -1,11 +1,12 @@
 # vue-vant-template
-Use vant's vue project template AND This is a base template
+这是一个使用 `vant` UI库的vue移动端项目
 
  [English](./README.md) | 简体中文
 
 ## 集成内容
 
 + 集成当下流行的移动端 [vant](https://youzan.github.io/vant/#/zh-CN/intro)
++ 基于`async-validator`实现vant的表单验证
 + 已配置基于 Rem 的适配方案
 + 使用[axios](https://github.com/axios/axios) 作为项目请求插件
 + vue 全家桶

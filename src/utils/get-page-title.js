@@ -1,6 +1,6 @@
 import defaultSettings from '@/settings'
 
-const title = defaultSettings.title || 'parallel-form'
+const title = defaultSettings.title || 'vue Vant Template'
 
 export default function getPageTitle(pageTitle) {
   if (pageTitle) {
