@@ -7,33 +7,23 @@
           height="4rem"
           round
           fit="cover"
-          src="https://avatars3.githubusercontent.com/u/31021895?s=460&v=4"
+          src="https://user-gold-cdn.xitu.io/2019/12/11/16ef5878b6b6d411?w=460&h=460&f=jpeg&s=30763"
         />
       </a>
     </div>
-    <van-cell-group style="height:200px;">
+    <van-cell-group>
       <van-field
         v-model="data.name"
-        placeholder="用户名"
+        placeholder="请输入用户名"
         :error-message="errorMsg.name"
         @blur="nameBlur('name')"
       />
-      <!-- 密码输入框 -->
-      <van-password-input
-        class="pass"
-        :value="data.password"
-        :focused="showKeyboard"
+      <van-field
+        v-model="data.password"
+        type="password"
+        placeholder="请输入密码"
         :error-message="errorMsg.password"
-        @focus="showKeyboard = true"
-        @blur="passBlur('password')"
-      />
-
-      <!-- 数字键盘 -->
-      <van-number-keyboard
-        :show="showKeyboard"
-        @input="onInput"
-        @delete="onDelete"
-        @blur="showKeyboard = false"
+        @blur="passwordBlur('password')"
       />
     </van-cell-group>
     <div class="sub">
@@ -51,7 +41,6 @@ import {
   CellGroup,
   Cell,
   Button,
-  Toast,
   PasswordInput,
   NumberKeyboard
 } from 'vant'
@@ -79,8 +68,8 @@ export default {
         name: '',
         password: ''
       },
-      value: '',
       showKeyboard: false,
+      redirect: undefined,
       rules: {
         name: [{ required: true, message: '请输入用户名' }],
         password: [
@@ -97,6 +86,14 @@ export default {
           }
         ]
       }
+    }
+  },
+  watch: {
+    $route: {
+      handler: function(route) {
+        this.redirect = route.query && route.query.redirect
+      },
+      immediate: true
     }
   },
   created() {
@@ -134,41 +131,32 @@ export default {
       }, data)
     },
     submit() {
-      this.validate((errors, fields) => {})
+      this.validate((errors, fields) => {
+        if (!errors && this.data.name === 'admin' && Number(this.data.password) === 123456) {
+          // 请求接口
+          this.$router.push({ path: this.redirect || '/home' })
+        }
+      })
     },
     reset() {
       this.data = {
         name: '',
-        code: '',
-        mobile: ''
+        password: ''
       }
       this.validator.setData(this.data)
       this.resetField()
     },
     nameBlur(val) {
-      this.validate(errors => {
-        if (!errors) {
-          Toast('输入正确') // 后期注释
-        } else {
-          Toast(errors) // 错误逻辑
-        }
-      }, val)
+      this.validate(errors => {}, val)
     },
-    passBlur(val) {
+    passwordBlur(val) {
       this.validate(errors => {
         // if (!errors) {
-        //   Toast("输入正确") // 后期注释
+        //   Toast('输入正确') // 后期注释
         // } else {
         //   Toast(errors) // 错误逻辑
         // }
       }, val)
-    },
-    // l;;l;l';'l;'l;'l
-    onInput(key) {
-      this.value = (this.value + key).slice(0, 6)
-    },
-    onDelete() {
-      this.value = this.value.slice(0, this.value.length - 1)
     }
   }
 }
@@ -179,7 +167,7 @@ export default {
   height: 100vh;
   background-color: rgb(247, 248, 250);
   .img {
-    padding: 50px 0;
+    padding: 20px 0;
     display: flex;
     justify-content: center;
   }
@@ -202,16 +190,5 @@ export default {
 .login /deep/ .van-field__error-message,
 .login /deep/ .van-field__control {
   text-align: center;
-}
-.login /deep/ .van-password-input__security {
-  border-radius: 30px;
-  // border: 1px solid #ccc;
-  overflow: hidden;
-}
-.login /deep/ .pass {
-  margin-top: 8px;
-}
-.login /deep/ .van-password-input__security li {
-  background-color: #ccc;
 }
 </style>
