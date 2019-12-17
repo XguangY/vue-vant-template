@@ -4,7 +4,7 @@ import Router from 'vue-router'
 Vue.use(Router)
 
 /* Layout */
-// import Layout from '@/layout'
+import Layout from '@/layout_list'
 
 /**
  * Note: sub-menu only appear when route children.length >= 1
@@ -56,8 +56,17 @@ export const constantRoutes = [
 
   {
     path: '/demo',
-    component: () => import('@/views/demo'),
-    hidden: true
+    component: Layout,
+    redirect: '/demo/index',
+    hidden: true,
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/demo'),
+        name: 'Demo',
+        meta: { title: 'Demo', icon: 'user', headerName: '写个demo', noCache: true }
+      }
+    ]
   },
 
   // 404 page must be placed at the end !!!

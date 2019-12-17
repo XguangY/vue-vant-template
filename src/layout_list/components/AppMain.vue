@@ -1,5 +1,5 @@
 <template>
-  <section class="app-main">
+  <section :class="{'app_main':app_main}" class="app-main">
     <transition name="fade-transform" mode="out-in">
       <router-view :key="key" />
     </transition>
@@ -7,8 +7,14 @@
 </template>
 
 <script>
+import { getDeviceToken } from '@/utils/auth'
 export default {
   name: 'AppMain',
+  data() {
+    return {
+      app_main: getDeviceToken()
+    }
+  },
   computed: {
     key() {
       return this.$route.path
@@ -19,14 +25,14 @@ export default {
 
 <style scoped>
 .app-main {
-  /*50 = navbar  */
-  min-height: calc(100vh - 50px);
+  /*45 = navbar  */
+  /* min-height: calc(100vh - 45px); */
   width: 100%;
   position: relative;
   overflow: hidden;
 }
-.fixed-header+.app-main {
-  padding-top: 50px;
+.app_main {
+  /* min-height: 100vh; */
 }
 </style>
 
