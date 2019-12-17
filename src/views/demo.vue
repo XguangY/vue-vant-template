@@ -43,7 +43,7 @@
 </template>
 <script>
 import { Field, CellGroup, Cell, Button, Toast } from 'vant'
-import validator from '@/utils/validator.js'
+import validator from '@/utils/validatorForm.js'
 
 export default {
   name: 'Demo',
